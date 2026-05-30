@@ -68,6 +68,7 @@ Install via Arduino Library Manager:
 
 > **Note:** Release the serial port from Arduino IDE before connecting Signal K, or data will not be received.
 
+## IMPORTANT: Once installed, paths must be created in signalk for the new data.  Download NMEA0183 XDR Sentence Parser plugin from the signalk main screen, then configure paths for each data source
 ## License
 
 MIT — use freely, attribution appreciated.
