@@ -9,46 +9,37 @@
  * - allows user engagement to align with data as surfaced by SK (NMEA plugin converts the degrees to radians, and
  *  vice versa)
  * 
- * flip this logic: the sender writes to NVS, and the firmware only reads — never writes from code. That's the 
- * right model for user-defined offsets that should survive reflashing.  That is, THE SENDER CHANNEL ONLY
- * WRITES TO NVS, the code does not apply values not sent by the sender channel (ENSURE sender channel 
- * CODE SENDS ZERO VALUES for any field that does not include explicitly defines offsets by user), eg:
- * 
- * // Phase 2 version — firmware never writes, only reads
-* void initNvsOffsets() {
-* preferences.begin("offsets", true);  // true = read-only
-*  offsetPitch  = preferences.getFloat("pitch",  0.0);
-* offsetRoll   = preferences.getFloat("roll",   0.0);
-* offsetBnoYaw = preferences.getFloat("bnoyaw", 0.0);
-* offsetQmcYaw = preferences.getFloat("qmcyaw", 0.0);
-* preferences.end();
-* }
+ * Current version has hardcoded offsets, but future version will impliment json formatted serial sender channel so that offsets 
+ * can be sent by user from java script of node red flow.  Note: ecause code uses NMEA0183, which requires human readable values
+ * in degrees, the value in degrees is converted
+ * to radians by the code.  The idea being to keep all logic in radians until immediately prior to converting to NMEA0183,
+ * and only then are offsets applied.  Offset values are then written to ESP non-volitile memory (NVS)
+ * and persist, even if board is powered off.  For simplicity, in this 'hardcoded offset version', the firmware writes the 
+ * values to NVS (always reads and always writes).  In the sender channel version, this method of reading/writing may 
+ * need to be modified.
  * 
  *
+ * Things to look out for/possible optimizations:
  * 
- * Phases:
- * 1. (THIS PHASE) Hardcoded (in firmware) offsets saved in NVS by firmware.  
- * 2. Sender channel created for user-defined, off-firmware offsets
- * 3. Java (signalk webapp) and/or node red UI for user defined setting of offsets
- * 
- *  
- * Things to look out for:
- * 1. The Catch: In SignalK and NMEA0183, a heading sentence (HDG) can carry both magnetic heading and 
+ * 1. In SignalK and NMEA0183, a heading sentence (HDG) can carry both magnetic heading and 
  * variation/deviation fields. By hardcoding a raw offset, you are essentially baking mounting error directly 
- * into the heading.
+ * into the heading.  This is perfectly fine for minor offsets (small adjustments to a baseline of zero), but these should
+ * not be used a substitute for poorly oriented/mounted (big offets needed) or boat-specific post-install calibration.
  * 
- * 2. Current code On boot, it checks if (!preferences.isKey(...)), meaning it only writes once on the very 
- * first boot, and thereafter only reads. This has zero risk of wearing out the flash.  BUT in future sender
- * channel versions make sure node red or java sends only a new JSON packet when the user explicitly clicks a 
- * "Save Calibration" button. If you accidentally program Node-RED to stream slider values in real-time to the 
- * ESP32 while a user is dragging a UI slider, you could write to the flash thousands of times in a couple of 
- * minutes and degrade the memory (so as not to exceed NVS limits on ESP32)
+ * 2. To prevent the risk of exceeding NVS write limits, current code On boot checks if (!preferences.isKey(...)), 
+ * meaning it only writes once on the very first boot, and thereafter only reads. This has zero risk of wearing out the 
+ * flash.  BUT in future sender channel versions will need to make sure node red or java sends only a new JSON packet 
+ * when the user explicitly clicks a "Save Calibration" button (also avoids serial conflicts, ie., data is unidirectional after
+ * booting). Risk is basically something like this: if one accidentally program Node-RED to stream slider values 
+ * in real-time to the ESP32 while a user is dragging a UI slider, you could write to the flash thousands of times in a couple 
+ * of minutes and degrade the memory (so as not to exceed NVS limits on ESP32)
  * 
- * 3. Compass adjustments should work perfectly at a flat dock. but there may be issues due to X and Y 
- * compensated (by sensors) three or 9-axis algorythmic adjustments based on the offsetted values.  POSSIBLE
- * FIX: Since you have a brilliant BNO085 IMU sitting right next to it on the same I2C bus, the BNO085 already 
- * outputs a highly accurate, tilt-compensated rotation vector. For your secondary compass (QMC), if you 
- * notice its heading swinging wildly while the boat is rolling heavily, you may eventually want to use the 
+ * 3. Compass adjustments should work perfectly at a flat dock and when the boat is in motion, if offsets are not
+ * dramatic (ie, just to get both compasses pointing tin the same direction if offset by <10 degrees or so. But watch for risks of  
+ * big offses, eg., there may be issues due to X and Y compensated (by sensors) three or 9-axis algorythmic adjustments based 
+ * on the offsetted values.  POSSIBLE FIX IF ENCOUNTERED: Simce the BNO085 IMU is sitting right next to it on the same I2C bus 
+ * (on my board), the BNO085 already outputs a highly accurate, tilt-compensated rotation vector. For the secondary compass 
+ * (QMC), if one notices heading swinging wildly while the boat is rolling heavily, you may eventually want to use the 
  * BNO's roll/pitch variables to mathematically "tilt-compensate" the raw QMC $X/Y$ values before calculating 
  * the heading.
  * 
