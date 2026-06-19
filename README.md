@@ -1,6 +1,8 @@
 # ESP32 SignalK Boat Sensor Puck
 
-A compact multi-sensor boating instrument that combines GPS, magnetic compass, IMU, and environmental sensing into a single ESP32-based unit. Data is sent over serial to a [Signal K](https://signalk.org/) server.
+A compact multi-sensor boating instrument that combines GPS (dual compasses in my case, as the GPS I am using - a Sequre M10-25Q GPS includes both a ublox M10 GPS and a QMC5883x three axis magnitometer on board), magnetic compass, IMU, and environmental sensing (temp/barometric pressure, and VCO) into a single ESP32-based unit. I have all of these sensors mounted in an enclosure about the size of a hocky puck which will be mounted above the transomway under a dodger.  All data is converted to json or NMEA0183 (version specific) over a single serial (USB) cable to the [Signal K](https://signalk.org/) server.  
+
+See README_BNO08x for details related to IMU sensor.
 
 ## Hardware
 
@@ -15,6 +17,11 @@ A compact multi-sensor boating instrument that combines GPS, magnetic compass, I
 **Custom I2C pins:** SDA = GPIO8, SCL = GPIO9  
 **BNO085:** INT = GPIO10, RST = GPIO11
 
+NOTE on wiring: 
+- All I2C connected sensors are wired on the same I2C bus (I am using Lonely Binary ESP32-S3, which is particular about which pins can be used for I2C, thus if using the same board, pins GPIO8 and GPIO9 work, others not so much.
+- I have the BNO08x reset pins wired, as there is some flukiness in its I2C timers, which will cause the board to eventually freeze, requiring a reset.  The code impliments a watchdog monitor of the sensor and will reset robustly if this happens (new in 2v7).
+- ublox M10 GPS requires 5v in many packages, whereas the other sensors are all 3.3v.  The board I am using do not require level shifting and the like when wiring both 5v and 3.3v on the same ESP.  Simply wire the GPS power to 5v (if 5v in your packaging), and the other sensors to shared 3.3v and GND rails.
+
 ## Output Rates
 
 | Sensor | Rate |
@@ -25,6 +32,17 @@ A compact multi-sensor boating instrument that combines GPS, magnetic compass, I
 | Environmental (BME680) | 0.5 Hz (every 2 s) |
 
 ## Firmware Versions
+
+Version 2v7 changelog:
+
+Changes to NMEA0183 version: 
+- Added more robust sensor keepalives/watchguards (due to known I2C instability of BNO)
+- Fixed other minor stability issues
+- Added hardcoded offsets that can be applied (in degrees, conde converts to radians) to account for variations in the levelness of surfaces when mounting (eg., if when mounted, sensor baseline roll and pitch are -1.2 and -.8, resepectively, for example, positive 1.0 and positive 8 degree values can be added in the '// Modify these variables...' block to account for less than perfectly level surfaces (providing near-zero baseline values).  NOTE: these offsets do not replace the need for boat specific calibration and various declination adjustments, all of which can be done in signalk with its own and other tools.  Rather, these offsets simply allow for minor adjustments to baseline the 'pucks' data values near zero.
+
+Changes to json version:
+- None yet, need to update
+
 
 ### `/NMEA0183/` — NMEA0183 output (recommended for most Signal K setups)
 
@@ -68,7 +86,11 @@ Install via Arduino Library Manager:
 
 > **Note:** Release the serial port from Arduino IDE before connecting Signal K, or data will not be received.
 
-## IMPORTANT: Once installed, paths must be created in signalk for the new data.  Download NMEA0183 XDR Sentence Parser plugin from the signalk main screen, then configure paths for each data source
+## IMPORTANT:
+- Once installed, paths must be created in signalk for the new data.  Download NMEA0183 XDR Sentence Parser plugin from the signalk main screen, then configure paths for each data source.
+- When upgrading, disable the GPS (or however this connection is named in your instance) connection in the SERVER -> DATA CONNECTIONS page in signalk, select the proper serial port in the IDE, flash, then release serial port (change to some other port) in the IDE, then re-enable the connection in signalk.
+- FYI: ubox GPS's take some time to obtain an inital fix from a cold start - upwards of 10-15 minutes (see their datasheets for details), whilst it established and saves a map of the 'visible' sat constellations.  Once a fix is established, it seems this map is cached in non-volitile memory, as new initial fixes after a reboot happen very quickly (nearly instantaneously).
+
 ## License
 
 MIT — use freely, attribution appreciated.

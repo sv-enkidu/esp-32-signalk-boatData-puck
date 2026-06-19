@@ -2,7 +2,9 @@
 
 ## Overview
 
-This project uses the **BNO085 (BNO08x series)** IMU rather than a simpler standalone compass or gyro. The short answer for why: no other readily available breakout board performs as many jobs simultaneously — tilt-compensated heading, pitch, roll, yaw, and active self-calibration — all in firmware, on the chip itself, before your code ever sees the data.
+This project uses the **BNO085 (BNO08x series)** IMU rather than other recommended IMU's commonly used with signalk, or a standalone compass/gyro. The short answer for why I am using this IMU is that it works great, and it can us used without pypilot for basic IMU (ie., not-autopilot related) calibration for roll, pitch and yaw.  The BNO is unique in that it has on-board firmware that runs the math to calculate the various interrelated values across its 9-axis', so no math is necessary for very accurate data for those values off-board or in firmware (the breakout board performs many jobs simultaneously — tilt-compensated heading, pitch, roll, yaw, and active self-calibration — all in firmware, on the chip itself, before your code ever sees the data.  It is this algorythmically processed data that the code outputs (options for unprocessed data modes exist, which I am not using as it works great as is, leveraging its native capibilities).  Details below.
+
+Note: The downside is that this board has known I2C timing issues (it can violate I2C timing requirements in certain situations). This is not a problem with this firmware, as version 2.7 implinents a sensor state watchdog and quite robust keepalive management.  You should be able to 'set it and forget it'.
 
 ---
 
