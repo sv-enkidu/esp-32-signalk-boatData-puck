@@ -1,5 +1,9 @@
 # ESP32 SignalK Boat Sensor Puck
 
+PLEASE NOTE THAT I AM NO LONGER USING I2C FOR THE IMU (BNO08x) FOR THIS PROJECT, but I have left the I2C code and details below.  This is due to some very frustrating, known I2C timing issues with this chip that I was never able to get stable.  I have since switched to UART for that sensor, and I have also replaced the BME680 with a BME280 (which loses VOC sensing but gains humidity sensing).  Please use the IMU UART code, which will be the code updated moving forward.
+
+## What is this project?
+
 A compact multi-sensor boating instrument that combines GPS, dual magnetometer (two compasses), IMU, and environmental sensing (temp/barometric pressure, and VCO) into a single ESP32-based unit. I have all of these sensors mounted in an enclosure about the size of a hocky puck which will be mounted above the transomway under a dodger.  All data is converted to json or NMEA0183 (version specific) over a single serial (USB) cable to the [Signal K](https://signalk.org/) server.  
 
 See README_BNO08x for details related to IMU sensor. Note: let the BNO08x run for a while in motion before setting any offsets.  The board dymanically compensates for a lot of motion and attempts to find its baseline zero point relative to that motion (like waving an iphone in figure 8 movements to set the compass).  This is by design and you may find no offsets are necessary (the code works fine with zero values, ie., no changes to offsets in the code).
