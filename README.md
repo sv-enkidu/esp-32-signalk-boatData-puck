@@ -91,7 +91,8 @@ Install via Arduino Library Manager:
 > **Note:** Release the serial port from Arduino IDE before connecting Signal K, or data will not be received.
 
 ## IMPORTANT:
-- Once installed, paths must be created in signalk for the new data.  Download NMEA0183 XDR Sentence Parser plugin from the signalk main screen, then configure paths for each data source.
+- Once installed, paths must be created in signalk for the new data.  Download NMEA0183 XDR Sentence Parser plugin from the signalk main screen, then configure paths for each data source using signalk NMEA XDR Sentence Parser plugin (see BNO08x readme for example configuration).
+- You must create a new connection for the puck (at 115200 baud, call it whatever you want, and enable checksum) when first using
 - When upgrading, disable the GPS (or however this connection is named in your instance) connection in the SERVER -> DATA CONNECTIONS page in signalk, select the proper serial port in the IDE, flash, then release serial port (change to some other port) in the IDE, then re-enable the connection in signalk.
 - FYI: ubox GPS's take some time to obtain an inital fix from a cold start - upwards of 10-15 minutes (see their datasheets for details), whilst it established and saves a map of the 'visible' sat constellations.  Once a fix is established, it seems this map is cached in non-volitile memory, as new initial fixes after a reboot happen very quickly (nearly instantaneously).
 
