@@ -16,7 +16,7 @@ See README_BNO08x for details related to IMU sensor. Note: let the BNO08x run fo
 | Sequre M10-250 GPS | Position / GNSS | UART (pins 16/17) |
 | QMC5883P (onboard GPS module) | Magnetic compass | 0x2C |
 | BNO085 IMU | Roll, pitch, yaw | 0x4A or 0x4B |
-| BME680 | Temp, pressure, VOC | 0x76 or 0x77 |
+| BME680 (or BME280 in version4v7) | Temp, pressure, VOC/humidity | 0x76 or 0x77 |
 
 **Custom I2C pins:** SDA = GPIO8, SCL = GPIO9  
 **BNO085:** INT = GPIO10, RST = GPIO11
