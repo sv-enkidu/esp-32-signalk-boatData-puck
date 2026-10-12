@@ -1,5 +1,9 @@
 # ESP32 SignalK Boat Sensor Puck
 
+PLEASE NOTE THAT I AM NO LONGER USING I2C FOR THE IMU (BNO08x) FOR THIS PROJECT, but I have left the I2C code and details below.  This is due to some very frustrating, known I2C timing issues with this chip that I was never able to get stable.  I have since switched to UART for that sensor, and I have also replaced the BME680 with a BME280 (which loses VOC sensing but gains humidity sensing).  Please use the IMU UART (version4v7) code, which will be the code updated moving forward.
+
+## What is this project?
+
 A compact multi-sensor boating instrument that combines GPS, dual magnetometer (two compasses), IMU, and environmental sensing (temp/barometric pressure, and VCO) into a single ESP32-based unit. I have all of these sensors mounted in an enclosure about the size of a hocky puck which will be mounted above the transomway under a dodger.  All data is converted to json or NMEA0183 (version specific) over a single serial (USB) cable to the [Signal K](https://signalk.org/) server.  
 
 See README_BNO08x for details related to IMU sensor. Note: let the BNO08x run for a while in motion before setting any offsets.  The board dymanically compensates for a lot of motion and attempts to find its baseline zero point relative to that motion (like waving an iphone in figure 8 movements to set the compass).  This is by design and you may find no offsets are necessary (the code works fine with zero values, ie., no changes to offsets in the code).
@@ -12,7 +16,7 @@ See README_BNO08x for details related to IMU sensor. Note: let the BNO08x run fo
 | Sequre M10-250 GPS | Position / GNSS | UART (pins 16/17) |
 | QMC5883P (onboard GPS module) | Magnetic compass | 0x2C |
 | BNO085 IMU | Roll, pitch, yaw | 0x4A or 0x4B |
-| BME680 | Temp, pressure, VOC | 0x76 or 0x77 |
+| BME680 (or BME280 in version4v7) | Temp, pressure, VOC/humidity | 0x76 or 0x77 |
 
 **Custom I2C pins:** SDA = GPIO8, SCL = GPIO9  
 **BNO085:** INT = GPIO10, RST = GPIO11
@@ -87,7 +91,8 @@ Install via Arduino Library Manager:
 > **Note:** Release the serial port from Arduino IDE before connecting Signal K, or data will not be received.
 
 ## IMPORTANT:
-- Once installed, paths must be created in signalk for the new data.  Download NMEA0183 XDR Sentence Parser plugin from the signalk main screen, then configure paths for each data source.
+- Once installed, paths must be created in signalk for the new data.  Download NMEA0183 XDR Sentence Parser plugin from the signalk main screen, then configure paths for each data source using signalk NMEA XDR Sentence Parser plugin (see BNO08x readme for example configuration).
+- You must create a new connection for the puck (at 115200 baud, call it whatever you want, and enable checksum) when first using
 - When upgrading, disable the GPS (or however this connection is named in your instance) connection in the SERVER -> DATA CONNECTIONS page in signalk, select the proper serial port in the IDE, flash, then release serial port (change to some other port) in the IDE, then re-enable the connection in signalk.
 - FYI: ubox GPS's take some time to obtain an inital fix from a cold start - upwards of 10-15 minutes (see their datasheets for details), whilst it established and saves a map of the 'visible' sat constellations.  Once a fix is established, it seems this map is cached in non-volitile memory, as new initial fixes after a reboot happen very quickly (nearly instantaneously).
 
