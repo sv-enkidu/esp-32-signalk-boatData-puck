@@ -1,14 +1,102 @@
 # ESP32 SignalK Boat Sensor Puck
 
-PLEASE NOTE THAT I AM NO LONGER USING I2C FOR THE IMU (BNO08x) FOR THIS PROJECT, but I have left the I2C code and details below.  This is due to some very frustrating, known I2C timing issues with this chip that I was never able to get stable.  I have since switched to UART for that sensor, and I have also replaced the BME680 with a BME280 (which loses VOC sensing but gains humidity sensing).  Please use the IMU UART (version4v7) code, which will be the code updated moving forward.
+PLEASE NOTE THAT I AM NO LONGER USING I2C FOR THE IMU (BNO08x) FOR THIS PROJECT, but I have left the I2C code in an earlier version in the repo, if anyone wants to attempt to connect the IMU this way (I strongly recommend that you to not do so).  Please see BNO08x readme for some details and context on that board.  Also, I have replaced the BME680 with a BME280 (which loses VOC sensing but gains humidity sensing), which is in the latest posted code.  
 
 ## What is this project?
 
 A compact multi-sensor boating instrument that combines GPS, dual magnetometer (two compasses), IMU, and environmental sensing (temp/barometric pressure, and VCO) into a single ESP32-based unit. I have all of these sensors mounted in an enclosure about the size of a hocky puck which will be mounted above the transomway under a dodger.  All data is converted to json or NMEA0183 (version specific) over a single serial (USB) cable to the [Signal K](https://signalk.org/) server.  
 
-See README_BNO08x for details related to IMU sensor. Note: let the BNO08x run for a while in motion before setting any offsets.  The board dymanically compensates for a lot of motion and attempts to find its baseline zero point relative to that motion (like waving an iphone in figure 8 movements to set the compass).  This is by design and you may find no offsets are necessary (the code works fine with zero values, ie., no changes to offsets in the code).
+See README_BNO08x for details related to IMU sensor. This is an excellent boating IMU, to my mind, perhaps the best off-the-shelf sensor available for this purpose. The board dynamically compensates between axis' of motion for all vectors sent to signalk, and the code is written so that both compass' inherit dynamic and real-time tilt compensation from the BNO.  Although I have included user-settable offsets in the code for roll (heel), pitch, yaw and compass alignment, most of the difficult and time consuming environmental compensation usually required with an IMU, or for tilt-compensation on the compass, is provided using native features of that sensor.  See BNO readme for details.   
 
-## Hardware
+## How to set up
+
+After wiring (see below and optional BNO readme), this will need to be setup in Signalk.  The process is fairly straightforward and once set up, it should function very robustly and dependably.  
+
+1. Download NMEA0183 XDR Sentence Parser plugin from the Signalk app store
+2. Set up new data connection for the puck (a one time step when setting up for the first time) in Signalk main menus (data -> connection).  Name connection anything you want, specify 115200 baud rate, select the proper serial port and enable checksum.
+3. Configure NMEA connections in the XDR parser plugin (Signalk main -> plugin configuration) and add the following:
+
+### 1. Pitch
+| Field | Value |
+|---|---|
+| Description | IMU Pitch |
+| Category | Angle (or Navigation) |
+| Units | deg |
+| XDR Sensor ID | `PITCH` |
+| Math expression | `x` |
+| Fixed decimal | 1 |
+| Signal K Path | `navigation.attitude.pitch` |
+
+### 2. Roll / Heel
+| Field | Value |
+|---|---|
+| Description | IMU Roll |
+| Category | Angle (or Navigation) |
+| Units | deg |
+| XDR Sensor ID | `ROLL` |
+| Math expression | `x` |
+| Fixed decimal | 1 |
+| Signal K Path | `navigation.attitude.roll` |
+
+### 3. Yaw (Secondary Heading)
+| Field | Value |
+|---|---|
+| Description | IMU Yaw |
+| Category | Angle (or Navigation) |
+| Units | deg |
+| XDR Sensor ID | `YAW` |
+| Math expression | `x` |
+| Fixed decimal | 1 |
+| Signal K Path | `navigation.attitude.yaw` |
+
+### 4. Temperature
+| Field | Value |
+|---|---|
+| Description | Temp |
+| Category | Angle (or Navigation) |
+| Units | deg |
+| XDR Sensor ID | `YAW` |
+| Math expression | `x` |
+| Fixed decimal | 1 |
+| Signal K Path | `navigation.attitude.yaw` |
+---
+
+### 5. Humidity
+| Field | Value |
+|---|---|
+| Description | Humid |
+| Category | Angle (or Navigation) |
+| Units | deg |
+| XDR Sensor ID | `YAW` |
+| Math expression | `x` |
+| Fixed decimal | 1 |
+| Signal K Path | `navigation.attitude.yaw` |
+---
+
+### 4. Pressure
+| Field | Value |
+|---|---|
+| Description | Pressure |
+| Category | Angle (or Navigation) |
+| Units | deg |
+| XDR Sensor ID | `YAW` |
+| Math expression | `x` |
+| Fixed decimal | 1 |
+| Signal K Path | `navigation.attitude.yaw` |
+
+---
+## Hardware and misc. feature details
+
+## Dual-Compass Configuration, with vertical/tilt axis compensation on  both
+
+When used alongside the onboard **QMC5883L** magnetometer (as on the Sequre M10-25Q GPS module), the code outputs both compass sources as distinct NMEA sentences:
+
+- `$HCHDG` — from the QMC5883L (`HC` = Heading Compass)
+- `$INHDG` or `$IIHDG` — from the BNO085 (`IN` = Integrated Navigation, `II` = Instrumentation)
+
+Signal K sees these as two independent `navigation.headingMagnetic` keys from different sources. This lets you designate one as primary while retaining the other for cross-validation or backup — and it creates a solid baseline for comparing and validating compass accuracy before you leave the dock.
+
+Since the QMC5883 compass is a three axis magnometer, but lacks any on-chip or firmware tilt compensation (ie., ordinarily adding tilt-compensation is quite a complex and variable process), I wrote the code so that the QMC compass uses the algo processed tilt-compensation dynamically from the BNO (free, highly accurate tilt-compensation)!  Note a bad bonus.
 
 | Component | Role | I2C Address |
 |---|---|---|
@@ -37,15 +125,16 @@ NOTE on wiring:
 
 ## Firmware Versions
 
-Version 2v7 changelog:
+Version 2v9 changelog:
 
 Changes to NMEA0183 version: 
-- Added more robust sensor keepalives/watchguards (due to known I2C instability of BNO)
-- Fixed other minor stability issues
+- Fixed other minor stability issues (the current version is very stable, I am running an autopilot using this IMU and it works exceptionally well).
 - Added hardcoded offsets that can be applied (in degrees, conde converts to radians) to account for variations in the levelness of surfaces when mounting (eg., if when mounted, sensor baseline roll and pitch are -1.2 and -.8, resepectively, for example, positive 1.0 and positive 8 degree values can be added in the '// Modify these variables...' block to account for less than perfectly level surfaces (providing near-zero baseline values).  NOTE: these offsets do not replace the need for boat specific calibration and various declination adjustments, all of which can be done in signalk with its own and other tools.  Rather, these offsets simply allow for minor adjustments to baseline the 'pucks' data values near zero.
+- Modified YAW offset and YAW functionality (see below YAW notes)
 
-Changes to json version:
-- None yet, need to update
+### Enclosure
+
+- 3D printable enclosure example added to repo.  Ideally print with ASA filament, or keep the puck out of intense, direct sunlight if less environmentally robust filament is used.
 
 
 ### `/NMEA0183/` — NMEA0183 output (recommended for most Signal K setups)
@@ -90,11 +179,28 @@ Install via Arduino Library Manager:
 
 > **Note:** Release the serial port from Arduino IDE before connecting Signal K, or data will not be received.
 
+## Baseline Calibration: Aligning the Two Compasses
+
+The BNO085 and QMC5883L will almost always be physically mounted at a slightly different angle inside the enclosure. Use Signal K's **math expression field** to correct this offset so that both sensors track each other cleanly across the full 360° arc.
+
+**Procedure:**
+1. Place the enclosure flat on a stable bench before installation.
+2. Rotate it until **Sensor A** reads exactly 0° (North) in Signal K.
+3. Note what **Sensor B** reads. The difference is your offset.
+4. In Sensor B's Signal K math field, enter: `value + (OFFSET_DEGREES * Math.PI / 180)`
+
+**Example:** If Sensor B reads 358° when Sensor A reads 0°, the offset is 2°:
+```
+value + (2 * Math.PI / 180)
+```
+
+After this one-time step, both sensors will track each other precisely — and you haven't yet left the dock.
+
+## Enhanced YAW and YAW caplibration
+(to add)
+
 ## IMPORTANT:
-- Once installed, paths must be created in signalk for the new data.  Download NMEA0183 XDR Sentence Parser plugin from the signalk main screen, then configure paths for each data source using signalk NMEA XDR Sentence Parser plugin (see BNO08x readme for example configuration).
-- You must create a new connection for the puck (at 115200 baud, call it whatever you want, and enable checksum) when first using
-- When upgrading, disable the GPS (or however this connection is named in your instance) connection in the SERVER -> DATA CONNECTIONS page in signalk, select the proper serial port in the IDE, flash, then release serial port (change to some other port) in the IDE, then re-enable the connection in signalk.
-- FYI: ubox GPS's take some time to obtain an inital fix from a cold start - upwards of 10-15 minutes (see their datasheets for details), whilst it established and saves a map of the 'visible' sat constellations.  Once a fix is established, it seems this map is cached in non-volitile memory, as new initial fixes after a reboot happen very quickly (nearly instantaneously).
+- Don't forget to set up in Signalk, and release serial port from your IDE after flashing, if the board is flashed using the same computer as your signalk server.
 
 ## License
 
