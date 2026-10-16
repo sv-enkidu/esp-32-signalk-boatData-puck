@@ -39,7 +39,7 @@ The current code uses `SH2_ROTATION_VECTOR`. The table below explains what the a
 
 ## Understanding the Continuous Micro-Corrections in Signal K
 
-You will notice the BNO085 heading value in Signal K is never completely static, even at anchor. This is not noise — it is the Kalman filter doing its job. Here is what each sensor contributes and what it costs:
+You will notice the BNO085 (and often QMC compass) heading value in Signal K is never completely static, even at anchor. This is not noise — it is the Kalman filter doing its job. Here is what each sensor contributes and what it costs:
 
 - **The Gyroscope** is very fast and responsive, but suffers from *gyro drift*: even when completely still, it accumulates tiny fractional errors that make it think it is rotating slightly. Left uncorrected, it would slowly wander away from true heading.
 - **The Magnetometer** is a stable absolute reference, but it is inherently noisy. Ambient electromagnetic radiation from nearby wiring, Earth's fluctuating field, and even cellular signals introduce constant background static.
@@ -48,78 +48,18 @@ The Kalman filter's job is to exploit the strengths of each sensor to cancel the
 
 ---
 
-## Dual-Compass Configuration
-
-When used alongside the onboard **QMC5883L** magnetometer (as on the Sequre M10-25Q GPS module), the code outputs both compass sources as distinct NMEA sentences:
-
-- `$HCHDG` — from the QMC5883L (`HC` = Heading Compass)
-- `$INHDG` or `$IIHDG` — from the BNO085 (`IN` = Integrated Navigation, `II` = Instrumentation)
-
-Signal K sees these as two independent `navigation.headingMagnetic` keys from different sources. This lets you designate one as primary while retaining the other for cross-validation or backup — and it creates a solid baseline for comparing and validating compass accuracy before you leave the dock.
-
----
-
-## Signal K Configuration
-
-Configure XDR paths in Signal K as follows:
-
-### 1. Pitch
-| Field | Value |
-|---|---|
-| Description | IMU Pitch |
-| Category | Angle (or Navigation) |
-| Units | deg |
-| XDR Sensor ID | `PITCH` |
-| Math expression | `x` |
-| Fixed decimal | 1 |
-| Signal K Path | `navigation.attitude.pitch` |
-
-### 2. Roll / Heel
-| Field | Value |
-|---|---|
-| Description | IMU Roll |
-| Category | Angle (or Navigation) |
-| Units | deg |
-| XDR Sensor ID | `ROLL` |
-| Math expression | `x` |
-| Fixed decimal | 1 |
-| Signal K Path | `navigation.attitude.roll` |
-
-### 3. Yaw (Secondary Heading)
-| Field | Value |
-|---|---|
-| Description | IMU Yaw |
-| Category | Angle (or Navigation) |
-| Units | deg |
-| XDR Sensor ID | `YAW` |
-| Math expression | `x` |
-| Fixed decimal | 1 |
-| Signal K Path | `navigation.attitude.yaw` |
-
----
-
-## Baseline Calibration: Aligning the Two Compasses
-
-The BNO085 and QMC5883L will almost always be physically mounted at a slightly different angle inside the enclosure. Use Signal K's **math expression field** to correct this offset so that both sensors track each other cleanly across the full 360° arc.
-
-**Procedure:**
-1. Place the enclosure flat on a stable bench before installation.
-2. Rotate it until **Sensor A** reads exactly 0° (North) in Signal K.
-3. Note what **Sensor B** reads. The difference is your offset.
-4. In Sensor B's Signal K math field, enter: `value + (OFFSET_DEGREES * Math.PI / 180)`
-
-**Example:** If Sensor B reads 358° when Sensor A reads 0°, the offset is 2°:
-```
-value + (2 * Math.PI / 180)
-```
-
-After this one-time step, both sensors will track each other precisely — and you haven't yet left the dock.
-
----
 
 ## Hardware Interface Options (PS0 / PS1 Pins)
 
-The BNO08x is unusual in that it can communicate over several completely different physical interfaces. The **PS0** and **PS1** pins (Protocol Selection) tell the chip which interface to use at startup. The current code uses the default I2C mode (both pins LOW / unconnected).
+The BNO08x is unusual in that it can communicate over several completely different physical interfaces. The **PS0** and **PS1** pins (Protocol Selection) tell the chip which interface to use at startup. The current code uses UART, which is strongly recommended.  It turns out, this board has known timing issues such that its I2C implementation violates the standards in ways that make it unreliable.  I initially deployed using I2C and despite a great deal of effort to make stable (including the addition of watch-guard code to catch failures and reset the board, this sensor just does not work dependably with I2C.  I migrated the code to UART and it works great, with no need for the watch-guard code, however in some versions I have left it in the code commented out for others who may want to try to make I2C work.
+
+## AN IMPORTANT NOTE ON UART WIRING with generic Chinese GY0BNO08x boards, or other boards where UART does not appear to work off-the-shelf
+
+IMPORTANT:  Before reading below methods on connecting to ESP32, read this paragraph, it may save you a lot of the pain I went through getting UART to work with cheaper boards.    
+
+The board comes in various form-factors, including versions by Sparkfun, Adafruit, and by various Chinese manufacturers and sellers (on Amazon, for example).   I used both the Sparkfun version (which works great and is well designed) and a cheap version like the one used in the UART example here:[   ](https://wolles-elektronikkiste.de/en/bno08x-9-dof-imus).  The code should work great with any version, so long as the PS1 jumper is closed (put solder blob across the PS1 jumper, and leave PS2 open), but in many cases, even with the jumper bridged, UART will work very poorly, or not at all, unless you wire PS1 high (to 3.3v, and optionally PS0 to GND.  UART is pulled high and although in theory, bridging that jumper should pull UART pins high, the signal is just not strong enough without hard wiring PS1 to VCC (see the UART examples in that URL).
+
+I am using full-on UART (not the UART-RVC mode), since RVC (as I understand it), bypasses at least some of the on-board/in-firmware processing that is so central to the power of the sensor. 
 
 | PS1 | PS0 | Interface | Notes |
 |---|---|---|---|
@@ -138,11 +78,11 @@ With PS1=LOW and PS0=HIGH, the chip ignores I2C entirely and simply streams a fi
 
 ## Wiring
 
+(See the URL above, but here is a summary):
 - **VCC**: 3.3V
 - **GND**: Ground
 - **SDA / SCL**: Shared I2C bus with other sensors (see code for GPIO pin assignments)
-- **RST**: ESP32 GPIO (defined as `BNO_RST` in code)
+- **RST**: ESP32 GPIO (defined as `BNO_RST` in code) 
 - **INT**: ESP32 GPIO (defined as `BNO_INT` in code)
-- PS0 and PS1 are left unconnected (pulled LOW internally = I2C default mode)
-
-See the main sketch for exact GPIO assignments.
+- **PS0**: Unconnected, or wire to ESP GND
+- **PS1**: Unconnected on the Sparkfun board, CONNECT TO 3.3V on the "GY-..." versions or if you have problems with UART
