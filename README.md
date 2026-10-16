@@ -14,7 +14,7 @@ After wiring (see below and optional BNO readme), this will need to be setup in 
 
 1. Download NMEA0183 XDR Sentence Parser plugin from the Signalk app store
 2. Set up new data connection for the puck (a one time step when setting up for the first time) in Signalk main menus (data -> connection).  Name connection anything you want, specify 115200 baud rate, select the proper serial port and enable checksum.
-3. Configure NMEA connections in the XDR parser plugin (Signalk main -> plugin configuration) and add the following:
+3. Configure NMEA connections in the XDR parser plugin (Signalk main -> Apps and plugins -> configuration - NMEA0183 XDR Sentence Parser) and add the following:
 
 ### 1. Pitch
 | Field | Value |
@@ -52,34 +52,34 @@ After wiring (see below and optional BNO readme), this will need to be setup in 
 ### 4. Temperature
 | Field | Value |
 |---|---|
-| Description | Temp |
+| Description | Air Temperature |
 | Category | Angle (or Navigation) |
-| Units | deg |
-| XDR Sensor ID | `YAW` |
-| Math expression | `x` |
-| Fixed decimal | 1 |
-| Signal K Path | `navigation.attitude.yaw` |
+| Units | C |
+| XDR Sensor ID | `TEMP` |
+| Math expression | `x+273.15` |
+| Fixed decimal | 2 |
+| Signal K Path | `navigation.outside.temperature` |
 ---
 
-### 5. Humidity
+### 5. Barometric Pressure
 | Field | Value |
 |---|---|
 | Description | Humid |
-| Category | Angle (or Navigation) |
-| Units | deg |
-| XDR Sensor ID | `YAW` |
-| Math expression | `x` |
-| Fixed decimal | 1 |
-| Signal K Path | `navigation.attitude.yaw` |
+| Category | pressure |
+| Units | bar |
+| XDR Sensor ID | `BARO` |
+| Math expression | `x*100000` |
+| Fixed decimal | 0 |
+| Signal K Path | `environment.outside.humidity` |
 ---
 
-### 4. Pressure
+### 4. (VOC - optiona, if using BME680)
 | Field | Value |
 |---|---|
-| Description | Pressure |
-| Category | Angle (or Navigation) |
-| Units | deg |
-| XDR Sensor ID | `YAW` |
+| Description | VOC Gas Detection |
+| Category | Other |
+| Units | kOhm |
+| XDR Sensor ID | `VOC` |
 | Math expression | `x` |
 | Fixed decimal | 1 |
 | Signal K Path | `navigation.attitude.yaw` |
