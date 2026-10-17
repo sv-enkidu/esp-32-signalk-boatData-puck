@@ -13,7 +13,8 @@ See detailed features and hardware overview below.
 
 See README_BNO08x for details related to IMU sensor. This is an excellent boating IMU, to my mind, perhaps the best off-the-shelf sensor available for this purpose. The board dynamically compensates between axis' of motion for all vectors sent to signalk, and the code is written so that both compass' inherit dynamic and real-time tilt compensation from the BNO.  Although I have included user-settable offsets in the code for roll (heel), pitch, yaw and compass alignment, most of the difficult and time consuming environmental compensation usually required with an IMU, or for tilt-compensation on the compass, is provided using native features of that sensor.  See BNO readme for details.   
 
-INSERT PICS
+Below are a couple examples of the puck hardware in various enclosures (enclosure stl file in the repo, in theory this can be resized for your hardware, but first seperatee the USB connected housing so that it maintains its proportions to fit the dimensions of the connector).
+
 
 ## How to set up
 
