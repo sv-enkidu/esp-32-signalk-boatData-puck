@@ -150,8 +150,9 @@ Version 2v9 changelog:
 
 Changes to NMEA0183 version: 
 - Fixed other minor stability issues (the current version is very stable, I am running an autopilot using this IMU and it works exceptionally well).
-- Added hardcoded offsets that can be applied (in degrees, conde converts to radians) to account for variations in the levelness of surfaces when mounting (eg., if when mounted, sensor baseline roll and pitch are -1.2 and -.8, resepectively, for example, positive 1.0 and positive 8 degree values can be added in the '// Modify these variables...' block to account for less than perfectly level surfaces (providing near-zero baseline values).  NOTE: these offsets do not replace the need for boat specific calibration and various declination adjustments, all of which can be done in signalk with its own and other tools.  Rather, these offsets simply allow for minor adjustments to baseline the 'pucks' data values near zero.
+- Added hardcoded offsets that can be applied (in degrees, conde converts to radians) to account for variations in the levelness of surfaces when mounting (eg., if when mounted, sensor baseline roll and pitch are -1.2 and -.8, resepectively, for example, positive 1.0 and positive 8 degree values can be added in the '// Modify these variables...' block to account for less than perfectly level surfaces (providing near-zero baseline values).  NOTE: these offsets do not replace the need for boat specific calibration and various declination adjustments (although there is no reason they could not be used as such, assuming you don't mind changing the firmware to set), all of which can be done in signalk with its own and other tools.  Rather, these offsets simply allow for minor adjustments to baseline the 'pucks' data values near zero.
 - Modified YAW offset and YAW functionality (see below YAW notes)
+- TO DO: add 2-way comms between puck and signalk/Node Red via MQTT (so that offsets can be set either dymanically using signalk path data and Node Red logic, or via a simply MQTT out node, for example).
 
 ### Enclosure
 
