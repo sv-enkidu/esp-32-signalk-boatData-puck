@@ -1,3 +1,4 @@
+
 # ESP32 SignalK Boat Sensor Puck
 
 PLEASE NOTE THAT I AM NO LONGER USING I2C FOR THE IMU (BNO08x) FOR THIS PROJECT, but I have left the I2C code in an earlier version in the repo, if anyone wants to attempt to connect the IMU this way (I strongly recommend that you to not do so).  Please see BNO08x readme for some details and context on that board.  Also, I have replaced the BME680 with a BME280 (which loses VOC sensing but gains humidity sensing), which is in the latest posted code.  
@@ -96,7 +97,9 @@ Note that the the various GPS paths and sources are default in Signalk and in ub
 
 ### Signalk Paths/Sources Browser view
 
-(insert browser view)
+Below is a screenshot of the paths and sources added to Signalk (actual GPS coordinates also added but offscreen).  Note if Signalk is configured to use GPS data and time, this path will also be included (as it is here). 
+
+<img width="887" height="1027" alt="puck_signalk_pathView" src="https://github.com/user-attachments/assets/43fe2f24-91e0-47bb-a5c7-fada0820ef96" />
 
 Note that the the various GPS paths and sources are default in Signalk and in ublox M10 GPS's, no connection must be set up in the NMEA sentence parser plugin (you should see about a dozen or so new GPS related paths/coursed once deployed).
 
