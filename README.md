@@ -1,7 +1,7 @@
 
 # ESP32 SignalK Boat Sensor Puck
 
-PLEASE NOTE THAT I AM NO LONGER USING I2C FOR THE IMU (BNO08x) FOR THIS PROJECT, but I have left the I2C code in an earlier version in the repo, if anyone wants to attempt to connect the IMU this way (I strongly recommend that you to not do so).  Please see BNO08x readme for some details and context on that board.  Also, I have replaced the BME680 with a BME280 (which loses VOC sensing but gains humidity sensing), which is in the latest posted code.  
+PLEASE NOTE THAT I AM NO LONGER USING I2C FOR THE IMU (BNO08x) FOR THIS PROJECT, instead, I am using UART, which is super stable, but I have left the I2C code in an earlier version in the repo, if anyone wants to attempt to connect the IMU this way (I strongly recommend that you to not do so).  Please see BNO08x readme for some details and context on that board.  Also, I have replaced the BME680 with a BME280 (which loses VOC sensing but gains humidity sensing), which is in the latest posted code.  
 
 ## What is this project?
 
