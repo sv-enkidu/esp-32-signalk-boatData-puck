@@ -103,7 +103,7 @@ Below is a screenshot of the paths and sources added to Signalk (actual GPS coor
 
 <img width="887" height="1027" alt="puck_signalk_pathView" src="https://github.com/user-attachments/assets/43fe2f24-91e0-47bb-a5c7-fada0820ef96" />
 
-Note that the the various GPS paths and sources are default in Signalk and in ublox M10 GPS's, no connection must be set up in the NMEA sentence parser plugin (you should see about a dozen or so new GPS related paths/coursed once deployed).
+Note that the the various GPS paths and sources are default in Signalk and in ublox M10 GPS's, no connection must be set up in the NMEA sentence parser plugin (you should see about a dozen or so new GPS related paths/coursed once deployed).  These include GPS derived data/time, and navigation.magneticVariationAgeOfService, for example, as well as the various views of GPS system in use and number of sats visible/locked.
 
 ## Hardware and misc. feature details
 
