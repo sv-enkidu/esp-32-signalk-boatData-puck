@@ -13,7 +13,7 @@ See detailed features and hardware overview below.
 
 See README_BNO08x for details related to IMU sensor. This is an excellent boating IMU, to my mind, perhaps the best off-the-shelf sensor available for this purpose. The board dynamically compensates between axis' of motion for all vectors sent to signalk, and the code is written so that both compass' inherit dynamic and real-time tilt compensation from the BNO.  Although I have included user-settable offsets in the code for roll (heel), pitch, yaw and compass alignment, most of the difficult and time consuming environmental compensation usually required with an IMU, or for tilt-compensation on the compass, is provided using native features of that sensor.  See BNO readme for details.   
 
-Below are a couple examples of the puck hardware in various enclosures (enclosure stl file in the repo, in theory this can be resized for your hardware, but first seperatee the USB connected housing so that it maintains its proportions to fit the dimensions of the connector).
+Below are a couple examples of the puck hardware in various enclosures (enclosure stl file in the repo, in theory this can be resized for your hardware, but first seperatee the USB connected housing so that it maintains its proportions to fit the dimensions of the connector).  I am using the ESP32's I had handy, which are quite large, with a smaller ESP the overall size could be reduced significantly.
 
 
 ## How to set up
@@ -127,6 +127,7 @@ Since the QMC5883 compass is a three axis magnometer, but lacks any on-chip or f
 
 **Custom I2C pins:** SDA = GPIO8, SCL = GPIO9  
 **BNO085:** INT = GPIO10, RST = GPIO11
+- See enclosure comments below for wiring of external USB connector, as shown in the image above (the connector is reset in the enclosure to reduce excess exposed wiring).
 
 NOTE on wiring: 
 - All I2C connected sensors are wired on the same I2C bus (I am using Lonely Binary ESP32-S3, which is particular about which pins can be used for I2C, thus if using the same board, pins GPIO8 and GPIO9 work, others not so much.
@@ -154,6 +155,9 @@ Changes to NMEA0183 version:
 ### Enclosure
 
 - 3D printable enclosure example added to repo.  Ideally print with ASA filament, or keep the puck out of intense, direct sunlight if less environmentally robust filament is used.
+- The USB connector I used looks like this (bought on amazon).  If you use these, wire the white and blue to D+/D- on the ESP, and connect power to the ESP 5V pin and GND (many GPS's like the one I used - a Sequre M10-250Q with integrated QMC5883 compass - require 5v).  the green wire is not needed, so clip it or leave it unwired.
+
+<img width="298" height="494" alt="USB_connector_image" src="https://github.com/user-attachments/assets/ed174e0c-3217-401e-ac34-f72efbff573b" />
 
 
 ### `/NMEA0183/` — NMEA0183 output (recommended for most Signal K setups)
