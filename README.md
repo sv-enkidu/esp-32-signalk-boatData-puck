@@ -15,6 +15,7 @@ See README_BNO08x for details related to IMU sensor. This is an excellent boatin
 
 Below are a couple examples of the puck hardware in various enclosures (enclosure stl file in the repo, in theory this can be resized for your hardware, but first seperatee the USB connected housing so that it maintains its proportions to fit the dimensions of the connector).  I am using the ESP32's I had handy, which are quite large, with a smaller ESP the overall size could be reduced significantly.
 
+https://github.com/sv-enkidu/esp-32-signalk-boatData-puck/blob/main/IMG_5853.jpeg
 
 ## How to set up
 
