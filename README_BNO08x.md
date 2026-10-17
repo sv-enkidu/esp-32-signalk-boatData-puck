@@ -26,7 +26,7 @@ A boat environment is particularly hostile to magnetometers. Engine blocks, alte
 
 ## Report Type Selection
 
-The current code uses `SH2_ROTATION_VECTOR`. The table below explains what the alternatives offer and why this one was chosen:
+The current code uses `SH2_ROTATION_VECTOR` (the dynamically adjusted outputs). The table below explains what the alternatives offer and why this one was chosen:
 
 | Report Type | Sensors Blended | Characteristics |
 |---|---|---|
