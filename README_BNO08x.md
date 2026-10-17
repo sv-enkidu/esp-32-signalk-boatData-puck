@@ -53,7 +53,7 @@ The Kalman filter's job is to exploit the strengths of each sensor to cancel the
 
 The BNO08x is unusual in that it can communicate over several completely different physical interfaces. The **PS0** and **PS1** pins (Protocol Selection) tell the chip which interface to use at startup. The current code uses UART, which is strongly recommended.  It turns out, this board has known timing issues such that its I2C implementation violates the standards in ways that make it unreliable.  I initially deployed using I2C and despite a great deal of effort to make stable (including the addition of watch-guard code to catch failures and reset the board, this sensor just does not work dependably with I2C.  I migrated the code to UART and it works great, with no need for the watch-guard code, however in some versions I have left it in the code commented out for others who may want to try to make I2C work.
 
-## AN IMPORTANT NOTE ON UART WIRING with generic Chinese GY0BNO08x boards, or other boards where UART does not appear to work off-the-shelf
+## AN IMPORTANT NOTE ON UART WIRING with generic Chinese GY-BNO08x boards, or other boards where UART does not appear to work off-the-shelf
 
 IMPORTANT:  Before reading below methods on connecting to ESP32, read this paragraph, it may save you a lot of the pain I went through getting UART to work with cheaper boards.    
 
