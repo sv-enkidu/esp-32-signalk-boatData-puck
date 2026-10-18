@@ -142,7 +142,7 @@ NOTE on wiring:
 | GPS (pass-through) | Native NMEA, 38400 baud |
 | Compass (QMC5883P) | 10 Hz |
 | IMU attitude (BNO085) | 10 Hz |
-| Environmental (BME680) | 0.5 Hz (every 2 s) |
+| Environmental (BME680/BME280) | 0.5 Hz (every 2 s) |
 
 ## Firmware Versions
 
