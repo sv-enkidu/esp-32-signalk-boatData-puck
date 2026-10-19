@@ -33,7 +33,8 @@ Three plots, each titled with what “good” looks like:
 - means some offset is left over, or the field was distorted where you were, so it’s a good thing to recheck on the bench
  or on the boat.
 
-
+See
+<img width="887" height="1027" alt="puck_signalk_pathView" src="https://github.com/sv-enkidu/esp-32-signalk-boatData-puck/blob/main/offset_helper_plot_example.png" />
 
 Previewing values before flashing:
 python qmc_cal_plot.py capture.txt --hard 0.233 0.143 0 --soft 1.0 1.0
