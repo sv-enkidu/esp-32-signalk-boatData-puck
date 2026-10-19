@@ -3,6 +3,8 @@
 
 PLEASE NOTE THAT I AM NO LONGER USING I2C FOR THE IMU (BNO08x) FOR THIS PROJECT, instead, I am using UART, which is super stable, but I have left the I2C code in an earlier version in the repo, if anyone wants to attempt to connect the IMU this way (I strongly recommend that you to not do so).  Please see BNO08x readme for some details and context on that board.  Also, I have replaced the BME680 with a BME280 (which loses VOC sensing but gains humidity sensing), which is in the latest posted code.  
 
+Added three axis compass calibration/offset utility to repo.  See readme_offset_helper for details
+
 ## What is this project?
 
 A compact multi-sensor boating instrument that combines GPS, dual magnetometer (two compasses), IMU, and environmental sensing (temp/barometric pressure, and VCO) into a single ESP32-based unit. I have all of these sensors mounted in an enclosure about the size of a hocky puck which will be mounted above the transomway under a dodger.  All data is converted to json or NMEA0183 (version specific) over a single serial (USB) cable to the [Signal K](https://signalk.org/) server.  
